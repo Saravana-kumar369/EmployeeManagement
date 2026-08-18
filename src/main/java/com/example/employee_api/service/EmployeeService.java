@@ -1,12 +1,16 @@
 
 package com.example.employee_api.service;
+import java.util.List;
 import java.util.Optional;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.employee_api.Entity.Employee;
 import com.example.employee_api.Repository.EmployeeRepository;
 import com.example.employee_api.exception.EmployeeNotFoundException;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class EmployeeService {
@@ -25,6 +29,24 @@ public class EmployeeService {
         return employeeRepository.findById(id).orElseThrow(() -> new EmployeeNotFoundException("Employee not found with id: " + id));
     }
     public Employee createEmployee(Employee employee) {
-    return employeeRepository.save(employee);
-}
+        return employeeRepository.save(employee);
+    }
+    public List<Employee> getAllEmployees() {
+        return employeeRepository.findAll();
+    }
+
+    @Transactional
+    public Employee updateEmployee(int id, Employee employee) {
+        // TODO Auto-generated method stub
+        Employee existingEmployee = getEmployeeDetails(id);
+        existingEmployee.setName(employee.getName());
+        existingEmployee.setDepartment(employee.getDepartment());
+        return existingEmployee;
+    }
+
+    @Transactional
+    public void deleteEmployee(int id) {
+        Employee existingEmployee = getEmployeeDetails(id);
+        employeeRepository.delete(existingEmployee);
+    }
 }
