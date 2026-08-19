@@ -15,7 +15,8 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PutMapping;
-
+import com.example.employee_api.DTO.EmployeeRequest;
+import com.example.employee_api.DTO.EmployeeResponse;
 
 @RestController
 public class EmployeeController {
@@ -32,21 +33,46 @@ public class EmployeeController {
 // public String getEmployees(@RequestParam(defaultValue = "all") String department) {
 //     return "Employees in department: " + department;
 // }
+    // @GetMapping("/employees/{id}")
+    // public ResponseEntity<Employee> getEmployee(@PathVariable int id) {
+
+    //     Employee employee = employeeService.getEmployeeDetails(id);
+
+    //     return ResponseEntity.ok(employee);
+    // }
+
+    //response DTO to hide the entity details from the client and only send the required information
     @GetMapping("/employees/{id}")
-    public ResponseEntity<Employee> getEmployee(@PathVariable int id) {
+    public ResponseEntity<EmployeeResponse> getEmployee(@PathVariable int id) {
 
         Employee employee = employeeService.getEmployeeDetails(id);
 
-        return ResponseEntity.ok(employee);
+        EmployeeResponse response = new EmployeeResponse(
+            employee.getEmployeeId(),
+            employee.getName(),
+            employee.getDepartment()
+        );
+
+        return ResponseEntity.ok(response);
     }
 
 
-    @GetMapping("/employees")
-    public ResponseEntity<List<Employee>> getEmployees() {
-        List<Employee> employee = employeeService.getAllEmployees();
-        return ResponseEntity.ok(employee);
-    }
+    // @GetMapping("/employees")
+    // public ResponseEntity<List<Employee>> getEmployees() {
+    //     List<Employee> employee = employeeService.getAllEmployees();
+    //     return ResponseEntity.ok(employee);
+    // }
     
+     @GetMapping("/employees")
+    public ResponseEntity<List<EmployeeResponse>> getEmployees() {
+        List<Employee> employee = employeeService.getAllEmployees();
+        List<EmployeeResponse> responses = employee.stream().map(emp -> new EmployeeResponse(
+            emp.getEmployeeId(),
+            emp.getName(),
+            emp.getDepartment()
+        )).toList();
+        return ResponseEntity.ok(responses);
+    }
     // @PostMapping("/employees")
     // public ResponseEntity<String> createEmployee(@RequestBody Employee employee) {
     //     return ResponseEntity
@@ -55,19 +81,19 @@ public class EmployeeController {
     // }
 
     @PostMapping("/employees")
-    public ResponseEntity<Employee> createEmployee(
-            @RequestBody Employee employee) {
+    public ResponseEntity<EmployeeResponse> createEmployee(
+            @RequestBody EmployeeRequest employeeRequest) {
 
-        Employee savedEmployee = employeeService.createEmployee(employee);
+        EmployeeResponse response = employeeService.createEmployee(employeeRequest);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(savedEmployee);
+                .body(response);
     }
 
     @PutMapping("/employees/{id}")
-    public ResponseEntity<Employee> putMethodName(@PathVariable int id, @RequestBody Employee employee) {
-        Employee updatedEmployee = employeeService.updateEmployee(id, employee);
+    public ResponseEntity<Employee> updateEmployee(@PathVariable int id, @RequestBody EmployeeRequest request) {
+        Employee updatedEmployee = employeeService.updateEmployee(id, request);
         
         return ResponseEntity.ok(updatedEmployee);
     }

@@ -6,6 +6,8 @@ import java.util.Optional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.example.employee_api.DTO.EmployeeRequest;
+import com.example.employee_api.DTO.EmployeeResponse;
 import com.example.employee_api.Entity.Employee;
 import com.example.employee_api.Repository.EmployeeRepository;
 import com.example.employee_api.exception.EmployeeNotFoundException;
@@ -28,19 +30,27 @@ public class EmployeeService {
         // reduces repeated code and makes it more readable by creating a custom exception class EmployeeNotFoundException.
         return employeeRepository.findById(id).orElseThrow(() -> new EmployeeNotFoundException("Employee not found with id: " + id));
     }
-    public Employee createEmployee(Employee employee) {
-        return employeeRepository.save(employee);
+    public EmployeeResponse createEmployee(EmployeeRequest employeeRequest) {
+        Employee employee = new Employee();
+        employee.setName(employeeRequest.getName());    
+        employee.setDepartment(employeeRequest.getDepartment());
+        Employee savedEmployee = employeeRepository.save(employee);
+        return new EmployeeResponse(
+            savedEmployee.getEmployeeId(),
+            savedEmployee.getName(),
+            savedEmployee.getDepartment()
+        );
     }
     public List<Employee> getAllEmployees() {
         return employeeRepository.findAll();
     }
 
     @Transactional
-    public Employee updateEmployee(int id, Employee employee) {
+    public Employee updateEmployee(int id, EmployeeRequest request) {
         // TODO Auto-generated method stub
         Employee existingEmployee = getEmployeeDetails(id);
-        existingEmployee.setName(employee.getName());
-        existingEmployee.setDepartment(employee.getDepartment());
+        existingEmployee.setName(request.getName());
+        existingEmployee.setDepartment(request.getDepartment());
         return existingEmployee;
     }
 
